@@ -83,7 +83,9 @@ class SprintCrawler:
 
         original_description = description.get("original_description")
         if original_description:
-            markdown_lines.append(f"### Original Description\n\n{original_description}\n")
+            converter = ADFToMarkdownConverter(original_description)
+            original_description_md = converter.convert()
+            markdown_lines.append(f"### Original Description\n\n{original_description_md}\n")
 
         custom_fields = description.get("custom_fields", [])
         if custom_fields:
