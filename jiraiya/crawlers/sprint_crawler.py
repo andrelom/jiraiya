@@ -69,17 +69,18 @@ class SprintCrawler:
             "description": combined_description,
         }
 
-    def _convert_description_to_markdown(self, description: Dict) -> str:
+    def _convert_description_to_markdown(self, description: Dict, title: str) -> str:
         """
         Convert a description JSON structure to Markdown format.
 
         Args:
             description (Dict): The description dictionary.
+            title (str): The task title.
 
         Returns:
             str: The Markdown representation of the description.
         """
-        markdown_lines = []
+        markdown_lines = [f"# {title}\n"]
 
         original_description = description.get("original_description")
         if original_description:
@@ -104,6 +105,7 @@ class SprintCrawler:
         """
         processed_ticket = self._process_ticket(ticket)
         ticket_id = ticket["key"]
+        title = processed_ticket["title"]
 
         # Save JSON file.
         json_file_path = os.path.join(self.output_folder, "json", f"{ticket_id}.json")
@@ -117,7 +119,9 @@ class SprintCrawler:
         # Save Markdown file.
         markdown_file_path = os.path.join(self.output_folder, "md", f"{ticket_id}.md")
         try:
-            markdown_content = self._convert_description_to_markdown(processed_ticket["description"])
+            markdown_content = self._convert_description_to_markdown(
+                processed_ticket["description"], title
+            )
             save_to_file(markdown_file_path, markdown_content)
             logger.info("Saved ticket %s to %s", ticket_id, markdown_file_path)
         except Exception as e:
