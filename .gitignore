@@ -1,0 +1,17 @@
+#
+# Folders
+
+tmp/
+
+__pycache__/
+
+.venv/
+
+#
+# Files
+
+*.log
+
+*.pyc
+
+.env
