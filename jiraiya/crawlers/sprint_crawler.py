@@ -2,7 +2,7 @@ import os
 import logging
 import json
 
-from typing import Dict, List
+from typing import Dict
 
 from jiraiya.shared.api import JiraAPIClient
 from jiraiya.shared.file import save_to_file
@@ -15,6 +15,8 @@ class SprintCrawler:
     """
     Orchestrates fetching sprint tickets from Jira and saving them to files.
     """
+
+    CUSTOM_FIELD_PREFIX = "customfield_"
 
     def __init__(
         self,
@@ -48,28 +50,27 @@ class SprintCrawler:
         Returns:
             Dict: A dictionary containing the task title and combined description.
         """
-        title = ticket["fields"].get("summary", "No Title")
-        description = ticket["fields"].get("description")
+        title = ticket.get("fields", {}).get("summary", "No Title")
+        description = ticket.get("fields", {}).get("description")
 
         combined_description = {
             "original_description": description,
             "custom_fields": [],
         }
 
-        for key, value in ticket["fields"].items():
-            if key.startswith("customfield_") and isinstance(value, dict):
+        for key, value in ticket.get("fields", {}).items():
+            if key.startswith(self.CUSTOM_FIELD_PREFIX) and isinstance(value, dict):
                 if value.get("type") == "doc":
-                    converter = ADFToMarkdownConverter(value)
-                    custom_text = converter.convert()
-                    if custom_text:
-                        combined_description["custom_fields"].append(custom_text)
+                    combined_description["custom_fields"].append({
+                        "field_id": key,
+                        "field_value": value,
+                    })
 
-        return {
-            "title": title,
-            "description": combined_description,
-        }
+        return {"title": title, "description": combined_description}
 
-    def _convert_description_to_markdown(self, description: Dict, title: str) -> str:
+    def _convert_description_to_markdown(
+        self, description: Dict, title: str
+    ) -> str:
         """
         Convert a description JSON structure to Markdown format.
 
@@ -82,17 +83,31 @@ class SprintCrawler:
         """
         markdown_lines = [f"# {title}\n"]
 
-        original_description = description.get("original_description")
-        if original_description:
-            converter = ADFToMarkdownConverter(original_description)
-            original_description_md = converter.convert()
-            markdown_lines.append(f"### Original Description\n\n{original_description_md}\n")
+        if original_description := description.get("original_description"):
+            try:
+                converter = ADFToMarkdownConverter(original_description)
+                markdown_lines.append("### Original Description\n")
+                markdown_lines.append(converter.convert())
+            except Exception as e:
+                logger.error("Error converting original description: %s", e)
+                markdown_lines.append("Error converting original description.\n")
 
         custom_fields = description.get("custom_fields", [])
         if custom_fields:
-            markdown_lines.append("### Custom Fields\n")
-            for idx, field in enumerate(custom_fields, start=1):
-                markdown_lines.append(f"#### Field {idx}\n\n{field}\n")
+            markdown_lines.append("\n### Custom Fields\n")
+            for field in custom_fields:
+                field_id = field.get("field_id", "Unknown Field ID")
+                field_value = field.get("field_value")
+
+                markdown_lines.append(f"#### {field_id}\n")
+                if isinstance(field_value, dict):
+                    try:
+                        converter = ADFToMarkdownConverter(field_value)
+                        markdown_lines.append(converter.convert())
+                    except Exception as e:
+                        markdown_lines.append(f"Error processing field: {e}\n")
+                else:
+                    markdown_lines.append("Unsupported field structure.\n")
 
         return "\n".join(markdown_lines)
 
@@ -103,29 +118,24 @@ class SprintCrawler:
         Args:
             ticket (Dict): A dictionary representing the Jira ticket.
         """
-        processed_ticket = self._process_ticket(ticket)
-        ticket_id = ticket["key"]
-        title = processed_ticket["title"]
-
-        # Save JSON file.
-        json_file_path = os.path.join(self.output_folder, "json", f"{ticket_id}.json")
         try:
-            content = json.dumps(processed_ticket, indent=4)
-            save_to_file(json_file_path, content)
-            logger.info("Saved ticket %s to %s", ticket_id, json_file_path)
-        except Exception as e:
-            logger.error("Failed to save ticket %s as JSON: %s", ticket_id, str(e))
+            processed_ticket = self._process_ticket(ticket)
+            ticket_id = ticket["key"]
+            title = processed_ticket["title"]
 
-        # Save Markdown file.
-        markdown_file_path = os.path.join(self.output_folder, "md", f"{ticket_id}.md")
-        try:
+            json_path = os.path.join(self.output_folder, "json", f"{ticket_id}.json")
+            save_to_file(json_path, json.dumps(processed_ticket, indent=4))
+            logger.info("Saved ticket as JSON: %s", json_path)
+
+            markdown_path = os.path.join(self.output_folder, "md", f"{ticket_id}.md")
             markdown_content = self._convert_description_to_markdown(
                 processed_ticket["description"], title
             )
-            save_to_file(markdown_file_path, markdown_content)
-            logger.info("Saved ticket %s to %s", ticket_id, markdown_file_path)
+            save_to_file(markdown_path, markdown_content)
+            logger.info("Saved ticket as Markdown: %s", markdown_path)
+
         except Exception as e:
-            logger.error("Failed to save ticket %s as Markdown: %s", ticket_id, str(e))
+            logger.error("Failed to save ticket %s: %s", ticket.get("key", "Unknown"), e)
 
     def start(self) -> None:
         """
@@ -133,22 +143,22 @@ class SprintCrawler:
         """
         logger.info("Starting SprintCrawler...")
 
-        fields = "summary,description," + ",".join(
-            field["id"]
-            for field in self.jira_client.get_available_fields()
-            if field["id"].startswith("customfield_")
-        )
+        try:
+            fields = "summary,description," + ",".join(
+                field["id"]
+                for field in self.jira_client.get_available_fields()
+                if field["id"].startswith(self.CUSTOM_FIELD_PREFIX)
+            )
+            jql = f'sprint = "{self.jira_sprint_id}"'
+            issues = self.jira_client.fetch_issues(jql, fields=fields)
 
-        jql = f'sprint = "{self.jira_sprint_id}"'
-        issues = self.jira_client.fetch_issues(jql, fields=fields)
+            if not issues:
+                logger.warning("No issues found for the specified sprint.")
+                return
 
-        if not issues:
-            logger.warning("No issues found for the specified sprint.")
-            return
+            for ticket in issues:
+                self._save_ticket(ticket)
 
-        for ticket in issues:
-            self._save_ticket(ticket)
-
-        logger.info(
-            "Successfully saved %d tickets to %s.", len(issues), self.output_folder
-        )
+            logger.info("Successfully processed %d tickets.", len(issues))
+        except Exception as e:
+            logger.error("Error during SprintCrawler execution: %s", e)
