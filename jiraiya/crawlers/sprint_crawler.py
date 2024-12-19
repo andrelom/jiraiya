@@ -67,12 +67,13 @@ class SprintCrawler:
         }
 
     def _convert_description_to_markdown(
-        self, title: str, description: Any, custom_fields: List[Dict[str, Any]]
+        self, ticket_id: str, title: str, description: Any, custom_fields: List[Dict[str, Any]]
     ) -> str:
         """
         Convert a description JSON structure to Markdown format.
 
         Args:
+            ticket_id (str): The ticket ID.
             title (str): The task title.
             description (Any): The description dictionary.
             custom_fields (List[Dict[str, Any]]): List of custom fields.
@@ -80,7 +81,7 @@ class SprintCrawler:
         Returns:
             str: The Markdown representation of the description.
         """
-        markdown_lines = [f"# {title}\n"]
+        markdown_lines = [f"# {ticket_id} - {title}\n"]
 
         if description:
             try:
@@ -127,7 +128,7 @@ class SprintCrawler:
             save_to_file(json_path, json.dumps(processed_ticket, indent=4))
             logger.info("Saved ticket as JSON: %s", json_path)
 
-            markdown_content = self._convert_description_to_markdown(title, description, custom_fields)
+            markdown_content = self._convert_description_to_markdown(ticket_id, title, description, custom_fields)
             save_to_file(markdown_path, markdown_content)
             logger.info("Saved ticket as Markdown: %s", markdown_path)
 
