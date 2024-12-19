@@ -1,6 +1,6 @@
 # Jiraiya
 
-Software designed to assist in analyzing Jira tickets and serilize them into local files.
+A tool designed to crawl Jira tickets and export them as local files in JSON and Markdown formats.
 
 ## Command Line
 
