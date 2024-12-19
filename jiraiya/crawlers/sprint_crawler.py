@@ -106,7 +106,7 @@ class SprintCrawler:
         ticket_id = ticket["key"]
 
         # Save JSON file.
-        json_file_path = os.path.join(self.output_folder, f"{ticket_id}.json")
+        json_file_path = os.path.join(self.output_folder, "json", f"{ticket_id}.json")
         try:
             content = json.dumps(processed_ticket, indent=4)
             save_to_file(json_file_path, content)
@@ -115,7 +115,7 @@ class SprintCrawler:
             logger.error("Failed to save ticket %s as JSON: %s", ticket_id, str(e))
 
         # Save Markdown file.
-        markdown_file_path = os.path.join(self.output_folder, f"{ticket_id}.md")
+        markdown_file_path = os.path.join(self.output_folder, "md", f"{ticket_id}.md")
         try:
             markdown_content = self._convert_description_to_markdown(processed_ticket["description"])
             save_to_file(markdown_file_path, markdown_content)
