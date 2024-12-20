@@ -8,13 +8,13 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Python
-    environment: str                = "development"
+    environment: str        = "development"
     # Jira
-    jira_url: str                    = ""
-    jira_email: str                  = ""
-    jira_api_token: str              = ""
-    jira_sprint_id: str              = ""
-    jira_output_folder: str          = ""
+    jira_url: str           = ""
+    jira_email: str         = ""
+    jira_api_token: str     = ""
+    jira_sprint_id: str     = ""
+    jira_output_folder: str = ""
 
     class Config:
         # Ignore extra fields in the environment.
