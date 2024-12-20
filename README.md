@@ -33,7 +33,6 @@ or
 - `pydantic_settings`
 - `httpx`
 - `questionary`
-- `jira`
 
 ## Atlassian Document Format
 
