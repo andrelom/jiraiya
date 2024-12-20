@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 import json
 
@@ -100,7 +101,7 @@ class SprintCrawler:
                 field_key = field.get("field_key", "Unknown Field ID")
                 field_value = field.get("field_value")
 
-                markdown_lines.append(f"### {field_key}\n")
+                markdown_lines.append(f"\n### {field_key}\n")
                 try:
                     converter = ADFToMarkdownConverter(field_value)
                     markdown_lines.append(converter.convert())
@@ -108,7 +109,9 @@ class SprintCrawler:
                     logger.error("Error processing custom field %s: %s", field_key, e)
                     markdown_lines.append(f"Error processing field {field_key}.\n")
 
-        return "\n".join(markdown_lines)
+        output = "\n".join(markdown_lines)
+        output = re.sub(r'\n+', '\n\n', output)
+        return output + "\n"
 
     def _save_ticket(self, ticket: Dict[str, Any]) -> None:
         """
