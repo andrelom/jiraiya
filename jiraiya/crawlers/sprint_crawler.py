@@ -88,8 +88,6 @@ class SprintCrawler:
         """
         markdown_lines = [f"# {id} - {title}\n"]
 
-        markdown_lines.append("\n## Description\n")
-
         if description:
             try:
                 converter = ADFToMarkdownConverter(description)
