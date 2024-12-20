@@ -111,7 +111,9 @@ class SprintCrawler:
         if not description and not customfields:
             markdown_lines.append("N/A")
 
-        return "\n\n".join(markdown_lines).strip()
+        output = "\n\n".join(markdown_lines).strip()
+        output = f"{output}\n"
+        return output
 
     def _save_ticket(self, ticket: Dict[str, Any]) -> None:
         """
