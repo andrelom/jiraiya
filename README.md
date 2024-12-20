@@ -36,4 +36,4 @@ or
 
 ## Atlassian Document Format
 
-This project tries to implement the [Atlassian Document Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/atlassian-document-format/) as a way to serialize Jira tickets into Markdown format.
+This project tries to implement the [Atlassian Document Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/) as a way to serialize Jira tickets into Markdown format.
