@@ -8,8 +8,8 @@ from jiraiya.shared.api import JiraAPIClient
 from jiraiya.shared.file import save_to_file
 from jiraiya.shared.markdown import ADFToMarkdownConverter
 
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 class SprintCrawler:
     """
