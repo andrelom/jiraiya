@@ -1,3 +1,4 @@
+import re
 import logging
 
 from enum import Enum
@@ -140,7 +141,9 @@ class ADFToMarkdownConverter:
     def convert(self) -> str:
         if self.adf_json.get("type") != "doc":
             raise ValueError("Invalid ADF document. Root node must be of type 'doc'.")
-        return '\n\n'.join(self.parse_node(node) for node in self.adf_json.get("content", []))
+        output = '\n'.join(self.parse_node(node) for node in self.adf_json.get("content", []))
+        output = re.sub(r'\n+', '\n\n', output)
+        return output
 
     @staticmethod
     def apply_mark(mark: Dict[str, Any], text: str) -> str:
