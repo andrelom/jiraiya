@@ -101,7 +101,7 @@ class SprintCrawler:
                 field_key = field.get("field_key", "Unknown Field ID")
                 field_value = field.get("field_value")
 
-                markdown_lines.append(f"\n### {field_key}\n")
+                markdown_lines.append(f"\n### {field_key.upper()}\n")
                 try:
                     converter = ADFToMarkdownConverter(field_value)
                     markdown_lines.append(converter.convert())
