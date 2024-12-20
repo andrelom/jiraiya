@@ -51,6 +51,7 @@ class SprintCrawler:
             Dict[str, Any]: A dictionary containing the task title, description, and custom fields.
         """
         fields = ticket.get("fields", {})
+        id = ticket.get("key", "unknown_ticket")
         title = fields.get("summary", "No Title")
         description = fields.get("description")
 
@@ -61,19 +62,20 @@ class SprintCrawler:
         ]
 
         return {
+            "id": id,
             "title": title,
             "description": description,
             "customfields": customfields,
         }
 
     def _convert_description_to_markdown(
-        self, ticket_id: str, title: str, description: Any, customfields: List[Dict[str, Any]]
+        self, id: str, title: str, description: Any, customfields: List[Dict[str, Any]]
     ) -> str:
         """
         Convert a description JSON structure to Markdown format.
 
         Args:
-            ticket_id (str): The ticket ID.
+            id (str): The ticket ID.
             title (str): The task title.
             description (Any): The description dictionary.
             customfields (List[Dict[str, Any]]): List of custom fields.
@@ -81,7 +83,7 @@ class SprintCrawler:
         Returns:
             str: The Markdown representation of the description.
         """
-        markdown_lines = [f"# {ticket_id} - {title}\n"]
+        markdown_lines = [f"# {id} - {title}\n"]
 
         if description:
             try:
@@ -117,18 +119,19 @@ class SprintCrawler:
         """
         try:
             processed_ticket = self._process_ticket(ticket)
-            ticket_id = ticket.get("key", "unknown_ticket")
+
+            id = processed_ticket.get("id", "unknown")
             title = processed_ticket["title"]
             description = processed_ticket.get("description")
             customfields = processed_ticket.get("customfields", [])
 
-            json_path = os.path.join(self.output_folder, "json", f"{ticket_id}.json")
-            markdown_path = os.path.join(self.output_folder, "md", f"{ticket_id}.md")
+            json_path = os.path.join(self.output_folder, "json", f"{id}.json")
+            markdown_path = os.path.join(self.output_folder, "md", f"{id}.md")
 
             save_to_file(json_path, json.dumps(processed_ticket, indent=4))
             logger.info("Saved ticket as JSON: %s", json_path)
 
-            markdown_content = self._convert_description_to_markdown(ticket_id, title, description, customfields)
+            markdown_content = self._convert_description_to_markdown(id, title, description, customfields)
             save_to_file(markdown_path, markdown_content)
             logger.info("Saved ticket as Markdown: %s", markdown_path)
 
