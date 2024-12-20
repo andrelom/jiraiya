@@ -112,7 +112,7 @@ class SprintCrawler:
 
         output = "\n".join(markdown_lines)
         output = re.sub(r'\n{2,}', '\n\n', output)
-        return output + "\n"
+        return output
 
     def _save_ticket(self, ticket: Dict[str, Any]) -> None:
         """
