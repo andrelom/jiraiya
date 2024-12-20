@@ -142,7 +142,7 @@ class ADFToMarkdownConverter:
         if self.adf_json.get("type") != "doc":
             raise ValueError("Invalid ADF document. Root node must be of type 'doc'.")
         output = '\n'.join(self.parse_node(node) for node in self.adf_json.get("content", []))
-        output = re.sub(r'\n+', '\n\n', output)
+        output = re.sub(r'\n{2,}', '\n\n', output)
         return output
 
     @staticmethod
