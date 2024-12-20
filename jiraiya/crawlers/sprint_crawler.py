@@ -54,7 +54,7 @@ class SprintCrawler:
         title = fields.get("summary", "No Title")
         description = fields.get("description")
 
-        custom_fields = [
+        customfields = [
             {"field_id": key, "field_value": value}
             for key, value in fields.items()
             if key.startswith(self.CUSTOM_FIELD_PREFIX) and isinstance(value, dict) and value.get("type") == "doc"
@@ -63,11 +63,11 @@ class SprintCrawler:
         return {
             "title": title,
             "description": description,
-            "custom_fields": custom_fields,
+            "customfields": customfields,
         }
 
     def _convert_description_to_markdown(
-        self, ticket_id: str, title: str, description: Any, custom_fields: List[Dict[str, Any]]
+        self, ticket_id: str, title: str, description: Any, customfields: List[Dict[str, Any]]
     ) -> str:
         """
         Convert a description JSON structure to Markdown format.
@@ -76,7 +76,7 @@ class SprintCrawler:
             ticket_id (str): The ticket ID.
             title (str): The task title.
             description (Any): The description dictionary.
-            custom_fields (List[Dict[str, Any]]): List of custom fields.
+            customfields (List[Dict[str, Any]]): List of custom fields.
 
         Returns:
             str: The Markdown representation of the description.
@@ -92,9 +92,9 @@ class SprintCrawler:
                 logger.error("Error converting original description: %s", e)
                 markdown_lines.append("Error converting original description.\n")
 
-        if custom_fields:
+        if customfields:
             markdown_lines.append("\n### Custom Fields\n")
-            for field in custom_fields:
+            for field in customfields:
                 field_id = field.get("field_id", "Unknown Field ID")
                 field_value = field.get("field_value")
 
@@ -120,7 +120,7 @@ class SprintCrawler:
             ticket_id = ticket.get("key", "unknown_ticket")
             title = processed_ticket["title"]
             description = processed_ticket.get("description")
-            custom_fields = processed_ticket.get("custom_fields", [])
+            customfields = processed_ticket.get("customfields", [])
 
             json_path = os.path.join(self.output_folder, "json", f"{ticket_id}.json")
             markdown_path = os.path.join(self.output_folder, "md", f"{ticket_id}.md")
@@ -128,7 +128,7 @@ class SprintCrawler:
             save_to_file(json_path, json.dumps(processed_ticket, indent=4))
             logger.info("Saved ticket as JSON: %s", json_path)
 
-            markdown_content = self._convert_description_to_markdown(ticket_id, title, description, custom_fields)
+            markdown_content = self._convert_description_to_markdown(ticket_id, title, description, customfields)
             save_to_file(markdown_path, markdown_content)
             logger.info("Saved ticket as Markdown: %s", markdown_path)
 
