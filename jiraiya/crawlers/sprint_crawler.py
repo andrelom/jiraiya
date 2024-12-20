@@ -50,13 +50,13 @@ class SprintCrawler:
         Returns:
             Dict[str, Any]: A dictionary containing the task title, description, and custom fields.
         """
-        fields = ticket.get("fields", {})
         id = ticket.get("key", "unknown_ticket")
+        fields = ticket.get("fields", {})
         title = fields.get("summary", "No Title")
         description = fields.get("description")
 
         customfields = [
-            {"field_id": key, "field_value": value}
+            {"field_key": key, "field_value": value}
             for key, value in fields.items()
             if key.startswith(self.CUSTOM_FIELD_PREFIX) and isinstance(value, dict) and value.get("type") == "doc"
         ]
@@ -97,16 +97,16 @@ class SprintCrawler:
         if customfields:
             markdown_lines.append("\n### Custom Fields\n")
             for field in customfields:
-                field_id = field.get("field_id", "Unknown Field ID")
+                field_key = field.get("field_key", "Unknown Field ID")
                 field_value = field.get("field_value")
 
-                markdown_lines.append(f"#### {field_id}\n")
+                markdown_lines.append(f"#### {field_key}\n")
                 try:
                     converter = ADFToMarkdownConverter(field_value)
                     markdown_lines.append(converter.convert())
                 except Exception as e:
-                    logger.error("Error processing custom field %s: %s", field_id, e)
-                    markdown_lines.append(f"Error processing field {field_id}.\n")
+                    logger.error("Error processing custom field %s: %s", field_key, e)
+                    markdown_lines.append(f"Error processing field {field_key}.\n")
 
         return "\n".join(markdown_lines)
 
