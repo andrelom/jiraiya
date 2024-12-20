@@ -86,15 +86,15 @@ class SprintCrawler:
         Returns:
             str: The Markdown representation of the description.
         """
-        markdown_lines = [f"# {id} - {title}\n"]
+        markdown_lines = [f"# {id} - {title}"]
 
         if description:
             try:
                 converter = ADFToMarkdownConverter(description)
-                markdown_lines.append(f"{converter.convert()}\n")
+                markdown_lines.append(converter.convert())
             except Exception as e:
                 logger.error("Error converting description: %s", e)
-                markdown_lines.append("Error converting description.\n")
+                markdown_lines.append("Error converting description.")
 
         if customfields:
             for field in customfields:
@@ -103,17 +103,15 @@ class SprintCrawler:
 
                 try:
                     converter = ADFToMarkdownConverter(field_value)
-                    markdown_lines.append(f"\n{converter.convert()}\n")
+                    markdown_lines.append(converter.convert())
                 except Exception as e:
                     logger.error("Error processing custom field %s: %s", field_key, e)
-                    markdown_lines.append(f"Error processing field {field_key}.\n")
+                    markdown_lines.append(f"Error processing field {field_key}.")
 
         if not description and not customfields:
-            markdown_lines.append("\nN/A\n")
+            markdown_lines.append("N/A")
 
-        output = "\n".join(markdown_lines)
-        output = re.sub(r'\n{1,}', '\n\n', output)
-        return output
+        return "\n\n".join(markdown_lines).strip()
 
     def _save_ticket(self, ticket: Dict[str, Any]) -> None:
         """
