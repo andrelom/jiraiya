@@ -132,7 +132,8 @@ class SprintCrawler:
             json_path = os.path.join(self.output_folder, "json", f"{id}.json")
             markdown_path = os.path.join(self.output_folder, "md", f"{id}.md")
 
-            save_to_file(json_path, json.dumps(processed_ticket, indent=4))
+            json_content = json.dumps(processed_ticket, indent=4)
+            save_to_file(json_path, json_content)
             logger.info("Saved ticket as JSON: %s", json_path)
 
             markdown_content = self._convert_description_to_markdown(id, title, description, customfields)
