@@ -56,6 +56,8 @@ class SprintCrawler:
         title = fields.get("summary", "No Title")
         description = fields.get("description")
 
+        # Only include custom fields that are of type "doc", as they are the only ones
+        # that are not plain text like the description field.
         customfields = [
             {"field_key": key, "field_value": value}
             for key, value in fields.items()
@@ -86,26 +88,24 @@ class SprintCrawler:
         """
         markdown_lines = [f"# {id} - {title}\n"]
 
+        markdown_lines.append("\n## Description\n")
+
         if description:
             try:
                 converter = ADFToMarkdownConverter(description)
-                markdown_lines.append("\n## Description\n")
-                markdown_lines.append(converter.convert())
+                markdown_lines.append(f"{converter.convert()}\n")
             except Exception as e:
                 logger.error("Error converting description: %s", e)
                 markdown_lines.append("Error converting description.\n")
 
         if customfields:
-            markdown_lines.append("\n## Custom Fields\n")
             for field in customfields:
                 field_key = field.get("field_key", "Unknown Field ID")
                 field_value = field.get("field_value")
-                field_title = field_key.split("_")[-1].strip()
 
-                markdown_lines.append(f"\n### Custom Field: {field_title}\n")
                 try:
                     converter = ADFToMarkdownConverter(field_value)
-                    markdown_lines.append(converter.convert())
+                    markdown_lines.append(f"\n{converter.convert()}\n")
                 except Exception as e:
                     logger.error("Error processing custom field %s: %s", field_key, e)
                     markdown_lines.append(f"Error processing field {field_key}.\n")
