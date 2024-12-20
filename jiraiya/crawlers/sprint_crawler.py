@@ -110,7 +110,7 @@ class SprintCrawler:
                     markdown_lines.append(f"Error processing field {field_key}.\n")
 
         output = "\n".join(markdown_lines)
-        output = re.sub(r'\n+', '\n\n', output)
+        output = re.sub(r'\n{2,}', '\n\n', output)
         return output + "\n"
 
     def _save_ticket(self, ticket: Dict[str, Any]) -> None:
