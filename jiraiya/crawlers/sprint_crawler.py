@@ -89,7 +89,7 @@ class SprintCrawler:
         if description:
             try:
                 converter = ADFToMarkdownConverter(description)
-                markdown_lines.append("## Original Description\n")
+                markdown_lines.append("\n## Original Description\n")
                 markdown_lines.append(converter.convert())
             except Exception as e:
                 logger.error("Error converting original description: %s", e)
