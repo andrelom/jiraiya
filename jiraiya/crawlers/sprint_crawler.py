@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 class SprintCrawler:
     """
-    Orchestrates fetching sprint tickets from Jira and saving them to files.
+    Crawls Jira to fetch tickets from a sprint and saves them as markdown files. Handles converting
+    Jira's Atlassian Document Format (ADF) to markdown, including custom fields.
     """
 
     CUSTOM_FIELD_PREFIX = "customfield_"
