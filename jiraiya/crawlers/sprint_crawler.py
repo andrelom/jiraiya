@@ -51,13 +51,13 @@ class SprintCrawler:
         Returns:
             Dict[str, Any]: A dictionary containing the task title, description, and custom fields.
         """
-        id = ticket.get("key", "unknown_ticket")
+        id = ticket.get("key", "N/A")
         fields = ticket.get("fields", {})
-        title = fields.get("summary", "No Title")
+        title = fields.get("summary", "N/A")
         description = fields.get("description")
 
         # Only include custom fields that are of type "doc", as they are the only ones
-        # that are not plain text like the description field.
+        # that are candidates for markdown conversion, and similar to the description field.
         customfields = [
             {"field_key": key, "field_value": value}
             for key, value in fields.items()
