@@ -88,19 +88,19 @@ class SprintCrawler:
         if description:
             try:
                 converter = ADFToMarkdownConverter(description)
-                markdown_lines.append("### Original Description\n")
+                markdown_lines.append("## Original Description\n")
                 markdown_lines.append(converter.convert())
             except Exception as e:
                 logger.error("Error converting original description: %s", e)
                 markdown_lines.append("Error converting original description.\n")
 
         if customfields:
-            markdown_lines.append("\n### Custom Fields\n")
+            markdown_lines.append("\n## Custom Fields\n")
             for field in customfields:
                 field_key = field.get("field_key", "Unknown Field ID")
                 field_value = field.get("field_value")
 
-                markdown_lines.append(f"#### {field_key}\n")
+                markdown_lines.append(f"### {field_key}\n")
                 try:
                     converter = ADFToMarkdownConverter(field_value)
                     markdown_lines.append(converter.convert())
