@@ -110,6 +110,9 @@ class SprintCrawler:
                     logger.error("Error processing custom field %s: %s", field_key, e)
                     markdown_lines.append(f"Error processing field {field_key}.\n")
 
+        if not description and not customfields:
+            markdown_lines.append("\nN/A\n")
+
         output = "\n".join(markdown_lines)
         output = re.sub(r'\n{2,}', '\n\n', output)
         return output
