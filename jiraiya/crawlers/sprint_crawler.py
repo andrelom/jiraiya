@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 import json
 
@@ -111,6 +112,7 @@ class SprintCrawler:
             markdown_lines.append("N/A")
 
         output = "\n\n".join(markdown_lines).strip()
+        output = re.sub(r'\n{3,}', '\n\n', output)
         output = f"{output}\n"
         return output
 
